@@ -1,33 +1,56 @@
+import DynamicImage from '@/components/ui/DynamicImage';
+import { useAuthContext } from '@/hooks/use-auth-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useContext } from 'react';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { NotesContext } from '../_context/notes_context';
+import {
+  Dimensions,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
+import { useFastNotes } from '../../context/notes_context';
+
+const screenWidth = Dimensions.get('window').width;
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { notes } = useContext(NotesContext); // fetch the list from context
+  const { notes } = useFastNotes();
+  const { logout } = useAuthContext();
 
+  const handleLogout = async () => {
+    await logout!();
+    router.replace('/login');
+  };
 
-  
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>My Notes</Text>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.title}>Job Notes</Text>
+      </View>
 
+      {/* Notatliste */}
       {notes.length === 0 ? (
         <Text style={styles.emptyText}>No notes yet 📭</Text>
       ) : (
         <FlatList
           data={notes}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingBottom: 100 }}
+          contentContainerStyle={{ paddingBottom: 120 }}
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.noteItem}
               onPress={() =>
                 router.push({
                   pathname: '/note_detail',
-                  params: { title: item.title, content: item.content },
+                  params: {
+                    id: item.id,
+                    title: item.title,
+                    content: item.text,
+                    imageUrl: item.image_url,
+                  },
                 })
               }
             >
@@ -37,20 +60,29 @@ export default function HomeScreen() {
               </View>
 
               <Text style={styles.noteContent} numberOfLines={2}>
-                {item.content}
+                {item.text}
               </Text>
+
+              {/* Dynamisk bilde */}
+              {item.image_url && <DynamicImage uri={item.image_url} />}
             </TouchableOpacity>
           )}
         />
       )}
 
-      {/* Floating Add Button – ALWAYS visible */}
+      {/* Flytende Add Note knapp */}
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => router.push('/new_note')}
       >
         <MaterialIcons name="note-add" size={20} color="#ffffff" />
         <Text style={styles.addButtonText}>Add Note</Text>
+      </TouchableOpacity>
+
+      {/* Logout knapp */}
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <MaterialIcons name="logout" size={24} color="#ffffff" />
+        <Text style={styles.addButtonText}>Logout</Text>
       </TouchableOpacity>
     </View>
   );
@@ -63,10 +95,15 @@ const styles = StyleSheet.create({
     paddingTop: 40,
     paddingHorizontal: 20,
   },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 20,
     color: '#333',
   },
   noteItem: {
@@ -98,15 +135,15 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   addButton: {
-    flexDirection: 'row',       // ← KEY
-    alignItems: 'center',       // vertically aligned nicely
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
-    backgroundColor: '#007AFF',
+    backgroundColor: '#009dff',
     paddingVertical: 14,
     paddingHorizontal: 20,
     borderRadius: 30,
     position: 'absolute',
-    bottom: 30,
+    bottom: 70,
     right: 20,
     elevation: 5,
     shadowColor: '#000',
@@ -118,6 +155,23 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#009dff',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 30,
+    position: 'absolute',
+    bottom: 70,
+    left: 20,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: 4,
   },
   emptyText: {
     textAlign: 'center',
