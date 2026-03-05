@@ -46,7 +46,7 @@ npm run reset-project
 ```
 
 
-## Features Implemented
+## Features Implemented for assignment2
 
 ### Authentication
 - [x] 10% **Sign-up:** Users can create an account with email/password.  
@@ -79,3 +79,33 @@ npm run reset-project
 ## Known Issues / Notes
 - Email confirmation link may expire quickly if not clicked immediately.  
 
+
+
+## Features Implemented for assignment3
+
+### Camera Integration
+- [x] 5%  **Permissions:** The app requests and handles permission for both the device camera and photo gallery.
+- [x] 10% **Capture & Pick:** Users can either take a new photo directly in the app or choose an existing image from the gallery.
+- [x] 5%  **Preview:** The selected image is displayed in the note window as a preview before the user confirms saving/uploading.
+
+### Storage & Validation
+- [x] 10% **Client-side Validation:** The app validates that the image file is under 15MB and in JPG, PNG, or WebP format before upload.
+- [x] 10% **Supabase Upload:** Images are securely uploaded to Supabase Storage with unique file names to avoid overwriting other users’ images.
+- [x] 5%  **DB Linking:** The URL of the uploaded image is stored in the notes table and linked to the correct note.
+
+### UI / UX (Images & Feedback)
+- [x] 10% **Loading States:** A spinner or progress indicator shows when an image is uploading, and the save button is disabled during the process.
+- [x] 10% **Aspect Ratio Handling:** Images displayed in the "Jobb Notater" screen scale properly and maintain their aspect ratio without stretching.
+- [x] 10% **Error Messaging:** Clear error messages are shown if the image is too large, has the wrong format, or if the upload fails.
+
+### Notifications
+- [x] 5% **System Permissions:** The app requests permission from the operating system to send notifications.
+
+#### Trigger Logic (15% total – choose one)
+- [x] 5% **Local Trigger:** The app sends a notification only to the user who presses "Save".  
+  The notification logic runs in the app after a successful `supabase.insert`.
+- [] 15% **Cloud / Edge Trigger:** When an employee creates a note, all other employees receive a notification.  
+  This is implemented using Supabase Webhooks and an Edge Function.
+
+- [x] 5% **Content Injection:** The notification includes the title of the created 
+note (e.g., "New note: [Note Title]").
