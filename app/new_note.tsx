@@ -77,7 +77,6 @@ const publicUrl = data.publicUrl;
   } 
   
   catch (error) {
-    console.log(error);
     Alert.alert('Upload error', 'Network request failed');
     return null;
   }

@@ -6,18 +6,18 @@ import { Alert, Button, Image, ScrollView, StyleSheet, TextInput, View } from 'r
 
 
 export default function NoteDetail() {
-    const router = useRouter();
-    const {updateNote, deleteNote} = useFastNotes(); 
-    const { id, title, content } = useLocalSearchParams(); // Get the title and content passed via router
+  const router = useRouter();
+  const { updateNote, deleteNote } = useFastNotes();
+  const { id, title, content } = useLocalSearchParams(); // Get the title and content passed via router
 
-      // Local state for editing
-    const [titleState, setTitleState] = useState(title as string || '');
-    const [contentState, setContentState] = useState(content as string || '');
-    const [imageState, setImageState] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [removeImage, setRemoveImage] = useState(false); // true hvis brukeren vil slette bildet
+  // Local state for editing
+  const [titleState, setTitleState] = useState(title as string || '');
+  const [contentState, setContentState] = useState(content as string || '');
+  const [imageState, setImageState] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [removeImage, setRemoveImage] = useState(false); // true hvis brukeren vil slette bildet
 
-     // ---------- Hent notatet fra Supabase ----------
+  // ---------- Hent notatet fra Supabase ----------
   useEffect(() => {
     if (!id) return;
 
@@ -31,7 +31,6 @@ export default function NoteDetail() {
           .single();
 
         if (error) {
-          console.error(error);
           Alert.alert('Failed to fetch note');
           return;
         }
@@ -42,7 +41,6 @@ export default function NoteDetail() {
           setImageState(data.image_url || null); // Her får vi URL fra DB
         }
       } catch (e) {
-        console.error(e);
         Alert.alert('Error fetching note');
       } finally {
         setLoading(false);
@@ -52,28 +50,27 @@ export default function NoteDetail() {
     fetchNote();
   }, [id]);
 
-const handleUpdate = async () => {
-  if (!id) 
-    return;
+  const handleUpdate = async () => {
+    if (!id)
+      return;
 
-  try {
-    await updateNote(id as string , titleState, contentState).then(res => {
-              if (res && res.data && res.data.length > 0) {
-                alert('✅ Note updated successfully!');
-              } else {
-                alert('🚫 You are not allowed to update this note');
-              }
-    router.back(); 
-     });
-     
-  } catch (e) {
-    console.error(e);
-    alert('Failed to update note');
-  }
-};
+    try {
+      await updateNote(id as string, titleState, contentState).then(res => {
+        if (res && res.data) {
+          alert('✅ Note updated successfully!');
+        } else {
+          alert('🚫 You are not allowed to update this note');
+        }
+        router.back();
+      });
 
-const handleDelete = async () => {
-  if (!id) return;
+    } catch (e) {
+      alert('Failed to update note');
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!id) return;
 
     Alert.alert(
       'Delete Note',
@@ -85,58 +82,55 @@ const handleDelete = async () => {
           style: 'destructive',
           onPress: async () => {
             try {// Hent notatet først for å få image_url
-            const { data: noteData, error: fetchError } = await supabase
-              .from('fast-notes')
-              .select('image_url')
-              .eq('id', id as string)
-              .single();
+              const { data: noteData, error: fetchError } = await supabase
+                .from('fast-notes')
+                .select('image_url')
+                .eq('id', id as string)
+                .single();
 
-            if (fetchError) {
-              console.error(fetchError);
-              alert('Failed to fetch note before deleting');
-              return;
-            }
+              if (fetchError) {
+                alert('Failed to fetch note before deleting');
+                return;
+              }
 
-            // Hvis bilde finnes → slett fra storage
-            if (noteData?.image_url) {
-              const filePath = noteData.image_url.split('/').pop(); 
-              // Viktig: dette må matche pathen du bruker i uploadImage()
+              // Hvis bilde finnes → slett fra storage
+              if (noteData?.image_url) {
+                const filePath = noteData.image_url.split('/').pop();
+                // Viktig: dette må matche pathen du bruker i uploadImage()
 
-              if (filePath) {
-                const { error: storageError } = await supabase.storage
-                  .from('note-images') // 👈 ditt bucket-navn
-                  .remove([filePath]);
+                if (filePath) {
+                  const { error: storageError } = await supabase.storage
+                    .from('note-images') // 👈 ditt bucket-navn
+                    .remove([filePath]);
 
-                if (storageError) {
-                  console.error(storageError);
+                  if (storageError) {
+                  }
                 }
               }
+
+              //  Slett notatet fra databasen
+              await deleteNote(id as string).then(res => {
+                if (res && res.data && res.data.length > 0) {
+                  alert('✅ Note deleted successfully!');
+                } else {
+                  alert('🚫 You are not allowed to delete this note');
+                }
+
+                router.back();
+              });
+
+            } catch (e) {
+              alert('Failed to delete note');
             }
-
-            //  Slett notatet fra databasen
-            await deleteNote(id as string).then(res => {
-              if (res && res.data && res.data.length > 0) {
-                alert('✅ Note deleted successfully!');
-              } else {
-                alert('🚫 You are not allowed to delete this note');
-              }
-            
-              router.back();
-            });
-
-          } catch (e) {
-            console.error(e);
-            alert('Failed to delete note');
-          }
+          },
         },
-      },
-    ]
-  );
-};
+      ]
+    );
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-     
+
 
       <TextInput
         style={styles.input}
@@ -153,7 +147,7 @@ const handleDelete = async () => {
         multiline
       />
 
-       {imageState && (
+      {imageState && (
         <Image
           source={{ uri: imageState }}
           style={styles.image}

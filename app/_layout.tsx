@@ -75,7 +75,6 @@ export default function RootLayout() {
 
         
       } catch (error) {
-        console.log('Error getting notification permissions:', error);
       }
     };
 
