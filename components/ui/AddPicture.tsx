@@ -1,4 +1,5 @@
 // app/components/ui/AddPicture.tsx
+import { useIsFocused } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useState } from 'react';
 import { Alert, Button, StyleSheet, Text, View } from 'react-native';
@@ -12,9 +13,11 @@ type AddPictureProps = {
 export default function AddPicture({ value, onChange }: AddPictureProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(value);
   const [hasPermission, setHasPermission] = useState(false);
+  const isFocused = useIsFocused();
 
   // Sjekk permissions når komponenten monteres
   useEffect(() => {
+    if (!isFocused) return; // ikke kjør kamera/galleri når skjermen ikke er fokusert
     (async () => {
       
       const cameraStatus = await ImagePicker.requestCameraPermissionsAsync();
@@ -27,12 +30,12 @@ export default function AddPicture({ value, onChange }: AddPictureProps) {
         setHasPermission(true);
       }
     })();
-  }, []);
+  }, [isFocused]); //kjør når skjermen blir fokusert
 
   // Pick image fra galleri
   const pickImage = async () => {
     if (!hasPermission) {
-      Alert.alert('Permission required');
+      Alert.alert('Permission required or screen not focused');
       return;
     }
 
@@ -45,8 +48,6 @@ export default function AddPicture({ value, onChange }: AddPictureProps) {
       const uri = result.assets[0].uri;
       setSelectedImage(uri);
       onChange(uri);
-
-      
     }
   };
 
