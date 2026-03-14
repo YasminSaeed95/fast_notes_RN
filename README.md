@@ -1,7 +1,27 @@
-# Welcome to your FastNotes app 👋
+# FastNotes – React Native Application
 
-FastNotes is a personal note-taking app built with **React Native** using **Expo** with Supabase backend.
-This app  allows users to sign up, log in, and manage notes collaboratively (create, read, update, delete).  
+FastNotes is a mobile note-taking application built with **React Native using Expo** and **Supabase** as backend.
+The application allows users to authenticate, create notes, attach images, and manage notes collaboratively.
+
+This README describes how to **set up, run, test, and build the application from source code**.
+
+Github repository:
+https://github.com/YasminSaeed95/fast_notes_RN
+
+---
+
+# Project Overview
+
+FastNotes allows users to:
+
+* Sign up and log in
+* Create, read, update, and delete notes
+* Upload images using camera or gallery
+* Store images securely in Supabase Storage
+* Receive notifications when creating notes
+* Load notes efficiently using pagination
+
+--- 
 
 ## Features
 
@@ -109,3 +129,309 @@ npm run reset-project
 
 - [x] 5% **Content Injection:** The notification includes the title of the created 
 note (e.g., "New note: [Note Title]").
+
+
+## Assignment4:
+Before building or running the project, ensure the following software is installed:
+
+* **Node.js** (version 18 or newer recommended)
+* **npm** (comes with Node.js)
+* **Expo CLI**
+
+```bash
+npm install -g expo-cli
+```
+
+* **EAS CLI** (for building APK)
+
+```bash
+npm install -g eas-cli
+```
+
+* **Android Studio** (for emulator testing)
+* **Git**
+* Optional: **Physical Android device**
+
+---
+
+# Project Setup
+
+## 1. Clone the repository
+
+```bash
+git clone https://github.com/YasminSaeed95/fast_notes_RN.git
+
+```
+Branch for this assignment:
+fast_notes_4
+
+## 2. Navigate to the project folder
+
+```bash
+cd fast_notes_RN
+```
+
+## 3. Install dependencies
+
+```bash
+npm install
+```
+
+---
+
+# Running the Application
+
+Start the Expo development server:
+
+```bash
+npx expo start
+```
+
+After starting the server you can run the app using:
+
+* Android emulator
+* iOS simulator
+* Physical device using **Expo Go**
+
+Expo will show a QR code which can be scanned with the Expo Go app or write a localhost.
+
+---
+
+# Building the Android Application (APK)
+
+To generate a runnable Android build:
+
+### Step 1 – Login to Expo
+
+```bash
+eas login
+```
+
+### Step 2 – Start Android build
+
+```bash
+eas build --platform android --profile development
+```
+
+### Step 3 – Download the APK
+
+After the build completes:
+
+* Expo provides a **download link**
+* The APK can be installed on:
+
+  * Android emulator
+  * physical Android devices
+
+Build time normally takes **5–10 minutes**.
+
+---
+
+# Running on Android
+
+## Android Emulator
+
+1. Install **Android Studio**
+2. Open **AVD Manager**
+3. Create a new device (example: Pixel 7 API 35)
+4. Start the emulator
+5. Install the generated APK
+
+---
+
+## Physical Android Device using WIFI
+
+1. Ensure computer and device are on the same network
+2. Enable **ADB over Wi-Fi**
+3. Install the APK wirelessly
+
+---
+
+# Testing
+
+The application includes automated tests written with:
+
+* **Jest**
+* **React Native Testing Library**
+
+Run the tests with:
+
+```bash
+npm test
+```
+
+---
+
+## Features Implemented for assignment4:
+
+## 1. Testing Suite (35%) ✅
+
+###✅ (10%)  Unit Test – Create Note & Navigation
+
+A unit test verifies that:
+
+* A valid note can be submitted
+* The creation logic executes
+* The user is navigated back to the main screen
+
+The test uses:
+
+* `fireEvent.press`
+* navigation mock
+
+---
+
+###✅(15%) Integration Test – Loader & Database Mock 
+
+An integration test simulates a database request.
+
+The test verifies that:
+
+* A loading spinner appears while notes are loading
+* The loader disappears when notes are fetched
+
+This test uses:
+
+* `jest.mock`
+* `waitFor`
+
+---
+
+###✅ (10%) Auth Guard Test – Access Control 
+
+The test ensures protected content is not accessible when the user is not logged in.
+
+If the session is `null`, the main content is not rendered.
+
+---
+
+# 2. Production Readiness & Optimization (40%) ✅
+
+ ##✅ (10%) Log Cleanup 
+
+All `console.log` statements have been removed from the final code to ensure a clean and professional codebase.
+
+---
+
+##✅ (10%) Resource Management – Camera 
+
+Camera components are managed so they do **not run in the background**.
+
+This is handled using:
+
+```
+useIsFocused()
+```
+
+The camera component is paused or unmounted when the screen loses focus.
+
+---
+
+## Pagination (Scaling)
+
+###✅ (10%) Initial Note Loading
+
+The application only loads **5 notes initially** from the database to improve performance.
+
+Supabase query example:
+
+```
+.range(0,4)
+```
+
+---
+
+###✅ (10%) Load More Button 
+
+A **Load More** button allows users to load the next set of notes.
+
+The query uses Supabase pagination:
+
+```
+.range(start, end)
+```
+
+Example:
+
+Page 1 → notes 1-5
+Page 2 → notes 6-10
+
+This ensures efficient loading when the database grows.
+
+---
+
+### Build & Dokumentasjon (25%) ✅
+
+ ✅ (10%) App File (APK) 
+ ✅ (15%) Build-documentation (README) 
+
+# Features Implemented
+
+## Authentication
+
+* User sign-up
+* Login and logout
+* Session persistence
+* Email verification template
+
+---
+
+## Notes Management
+
+Users can:
+
+* Create notes
+* Read notes from all users
+* Update their own notes
+* Delete their own notes
+
+Validation prevents empty title or text fields.
+
+---
+
+## Camera & Image Upload
+
+Users can:
+
+* Take a photo with the device camera
+* Select images from the gallery
+* Preview images before uploading
+
+Images are validated before upload:
+
+* Maximum size: **15 MB**
+* Allowed formats:
+
+  * JPG
+  * PNG
+  * WebP
+
+Images are uploaded to **Supabase Storage** and linked to the correct note.
+
+---
+
+## Notifications
+
+The app requests permission for system notifications.
+
+When a note is successfully created, the user receives a **local notification** containing the note title.
+
+Example:
+
+```
+New note: [Note Title]
+```
+
+---
+
+# Technologies Used
+
+* React Native
+* Expo
+* Supabase
+* TypeScript
+* Jest
+* React Native Testing Library
+
+---
+
