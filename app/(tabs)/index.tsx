@@ -1,9 +1,10 @@
 import DynamicImage from '@/components/ui/DynamicImage';
 import { useAuthContext } from '@/hooks/use-auth-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback } from 'react';
 import {
-  Dimensions,
+  ActivityIndicator,
   FlatList,
   StyleSheet,
   Text,
@@ -12,12 +13,16 @@ import {
 } from 'react-native';
 import { useFastNotes } from '../../context/notes_context';
 
-const screenWidth = Dimensions.get('window').width;
-
 export default function HomeScreen() {
   const router = useRouter();
-  const { notes } = useFastNotes();
+  const { notes, loading, refresh, loadMore, hasMore  } = useFastNotes();
   const { logout } = useAuthContext();
+
+  useFocusEffect(
+    useCallback(() => {
+      refresh();
+    }, [refresh])
+  );
 
   const handleLogout = async () => {
     await logout!();
@@ -31,8 +36,12 @@ export default function HomeScreen() {
         <Text style={styles.title}>Job Notes</Text>
       </View>
 
-      {/* Notatliste */}
-      {notes.length === 0 ? (
+      {loading ? (
+        <View testID="loader">
+          <ActivityIndicator size="large" color="#0000ff" />
+          <Text>Loading notes...</Text>
+        </View>
+      ) : notes.length === 0 ? (
         <Text style={styles.emptyText}>No notes yet 📭</Text>
       ) : (
         <FlatList
@@ -58,12 +67,9 @@ export default function HomeScreen() {
                 <MaterialIcons name="notes" size={20} color="#007AFF" />
                 <Text style={styles.noteTitle}>{item.title}</Text>
               </View>
-
               <Text style={styles.noteContent} numberOfLines={2}>
                 {item.text}
               </Text>
-
-              {/* Dynamisk bilde */}
               {item.image_url && <DynamicImage uri={item.image_url} />}
             </TouchableOpacity>
           )}
@@ -84,7 +90,16 @@ export default function HomeScreen() {
         <MaterialIcons name="logout" size={24} color="#ffffff" />
         <Text style={styles.addButtonText}>Logout</Text>
       </TouchableOpacity>
+
+      {/* Load more knapp */}
+      <TouchableOpacity style={styles.loadMoreButton} onPress={loadMore}>
+        <MaterialIcons name="download" size={24} color="#ffffff" />
+        <Text style={styles.addButtonText}>Load More</Text>
+      </TouchableOpacity>
+
     </View>
+
+
   );
 }
 
@@ -179,4 +194,26 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#777',
   },
+loadMoreButton: {
+  flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  paddingVertical: 12,
+  paddingHorizontal: 12,
+  backgroundColor: '#009dff',
+  borderRadius: 30,
+  alignSelf: 'center',
+  marginVertical: 10,
+  elevation: 3,
+  shadowColor: '#000',
+  shadowOpacity: 0.2,
+  shadowOffset: { width: 0, height: 2 },
+  shadowRadius: 4,
+  fontWeight: 'bold',
+  fontSize: 16,
+   position: 'absolute',
+    bottom: 120,
+    right: 20,
+},
+
 });
